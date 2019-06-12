@@ -1,0 +1,39 @@
+server:
+  port: 8080
+spring:
+  cloud:
+    gateway:
+      routes:
+      # Using Path as predicate
+      - id: hello_route
+        uri: https://spring-producer.apps.pp01i.edc1.cf.ford.com/test-path
+        predicates:
+        - Path=/test-path
+       # Using time before as predicate (success senario)
+      - id: before_route
+        uri: https://spring-producer.apps.pp01i.edc1.cf.ford.com/test-before-time
+        predicates:
+        - Before=2020-05-31T08:20:10+05:30[Asia/Kolkata]
+        - Path=/test-before-time
+        # Using time before as predicate (failure scenario)
+      - id: before_route_fail
+        uri: https://spring-producer.apps.pp01i.edc1.cf.ford.com/test-before-time-fail
+        predicates:
+        - Before=2019-05-29T08:20:10+05:30[Asia/Kolkata]
+        - Path=/test-before-time-fail
+        # Request rate limit
+      - id: test-request-rate-limit
+        uri: https://spring-producer.apps.pp01i.edc1.cf.ford.com/test-request-rate-limit
+        predicates:
+        - Path=/test-request-rate-limit
+        filters:
+        - name: RequestRateLimiter
+          args:
+            key-resolver: '#{@requestHeaderKeyResolver}'
+            redis-rate-limiter.replenishRate: 2
+            redis-rate-limiter.burstCapacity: 3
+#redis host details
+  redis:
+    host: 10.14.104.190
+    password: BNXWJq64VgLzvedQ+ubpx/Wfj4w=
+    port: 6379
